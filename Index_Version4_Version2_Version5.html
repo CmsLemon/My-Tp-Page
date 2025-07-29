@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lemon's Teleport Commands</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      transition: background 0.3s, color 0.3s;
+    }
+    .container {
+      padding: 2rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      text-align: center;
+      transition: background 0.3s, color 0.3s;
+    }
+    button {
+      font-size: 1.2rem;
+      padding: 0.5rem 1.2rem;
+      border: none;
+      border-radius: 4px;
+      background: #0070f3;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      margin: 0.5rem;
+    }
+    button:hover {
+      background: #005bb5;
+    }
+
+    /* Dark mode styles */
+    body.dark-mode {
+      background: #181818;
+      color: #f4f4f4;
+    }
+    .container.dark-mode {
+      background: #232323;
+      color: #f4f4f4;
+    }
+    body.dark-mode button:not(.dark-mode-toggle) {
+      background: #d32f2f;
+      color: #fff;
+    }
+    body.dark-mode button:not(.dark-mode-toggle):hover {
+      background: #b71c1c;
+    }
+
+    /* Switch styles */
+    .switch-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    .switch-label {
+      margin-left: 0.5rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 24px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.4s;
+      border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #222;
+    }
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+    /* Confetti styles */
+    .confetti {
+      position: fixed;
+      left: 0;
+      top: 0;
+      pointer-events: none;
+      width: 100vw;
+      height: 100vh;
+      z-index: 9999;
+    }
+    /* Title styles */
+    .main-title {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 1.5rem;
+      color: #222;
+      letter-spacing: 1px;
+    }
+    .banana-img {
+      display: block;
+      margin: 0 auto 1rem auto;
+      max-width: 120px;
+      height: auto;
+      /* For dark mode, add a slight glow */
+      filter: drop-shadow(0 0 8px #ffe066);
+      background: transparent;
+    }
+    body.dark-mode .main-title,
+    .container.dark-mode .main-title {
+      color: #f4f4f4;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="main-container">
+    <img src="Cmslemon.png" alt="Lemon Banana" class="banana-img" />
+    <div class="main-title">Lemon's Teleport Commands</div>
+    <button id="pointlessBtn">Pointless button</button>
+    <button onclick="window.location.href='https://www.youtube.com/@lemonthebanana_shorts'">Go to Lemon's Youtube</button>
+    <button onclick="window.location.href='https://www.tiktok.com/@lemon.the.banana'">Go to Lemon's Tiktok</button>
+    <button onclick="window.location.href='https://discord.gg/7rxjp5BAnD'">Go to Lemon's Discord</button>
+    <div class="switch-container">
+      <label class="switch">
+        <input type="checkbox" id="darkModeSwitch" onchange="toggleDarkModeSwitch()">
+        <span class="slider"></span>
+      </label>
+      <span class="switch-label" onclick="document.getElementById('darkModeSwitch').click();">Dark Mode</span>
+    </div>
+  </div>
+  <canvas class="confetti" id="confetti-canvas"></canvas>
+  <script>
+    function toggleDarkModeSwitch() {
+      const isChecked = document.getElementById('darkModeSwitch').checked;
+      document.body.classList.toggle('dark-mode', isChecked);
+      document.getElementById('main-container').classList.toggle('dark-mode', isChecked);
+    }
+
+    // Confetti effect logic
+    const confettiColors = [
+      "#ff0a54", "#ff477e", "#ff7096", "#ff85a1", "#fbb1bd",
+      "#f9bec7", "#f7cad0", "#b5ead7", "#caffbf", "#9bf6ff",
+      "#a0c4ff", "#bdb2ff", "#ffc6ff", "#fdffb6"
+    ];
+
+    function randomBetween(a, b) {
+      return a + Math.random() * (b - a);
+    }
+
+    function launchConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      canvas.width = w;
+      canvas.height = h;
+
+      const confettiCount = 120;
+      const gravity = 0.5;
+      const confettiPieces = [];
+
+      for (let i = 0; i < confettiCount; i++) {
+        confettiPieces.push({
+          x: randomBetween(0, w),
+          y: randomBetween(-h, 0),
+          r: randomBetween(5, 9),
+          d: randomBetween(15, 35),
+          color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
+          tilt: randomBetween(-10, 10),
+          tiltAngle: 0,
+          tiltAngleIncremental: randomBetween(0.07, 0.12),
+          opacity: randomBetween(0.7, 1)
+        });
+      }
+
+      let frame = 0;
+      function drawConfetti() {
+        ctx.clearRect(0, 0, w, h);
+        confettiPieces.forEach(conf => {
+          ctx.beginPath();
+          ctx.lineWidth = conf.r;
+          ctx.strokeStyle = conf.color;
+          ctx.globalAlpha = conf.opacity;
+          ctx.moveTo(conf.x + conf.tilt + conf.r/3, conf.y);
+          ctx.lineTo(conf.x + conf.tilt, conf.y + conf.d);
+          ctx.stroke();
+        });
+        ctx.globalAlpha = 1; // Reset for other canvas draws
+      }
+
+      function updateConfetti() {
+        for (let i = 0; i < confettiPieces.length; i++) {
+          let conf = confettiPieces[i];
+          conf.y += (Math.cos(frame + conf.d) + 2 + gravity) / 2;
+          conf.x += Math.sin(frame) * 2;
+          conf.tiltAngle += conf.tiltAngleIncremental;
+          conf.tilt = Math.sin(conf.tiltAngle) * 15;
+
+          // Recycle confetti to the top if it falls below screen
+          if (conf.y > h) {
+            conf.y = randomBetween(-20, 0);
+            conf.x = randomBetween(0, w);
+          }
+        }
+      }
+
+      let animationFrames = 0;
+      function animate() {
+        frame++;
+        drawConfetti();
+        updateConfetti();
+        animationFrames++;
+        if (animationFrames < 120) { // Show confetti for ~2 seconds at 60fps
+          requestAnimationFrame(animate);
+        } else {
+          ctx.clearRect(0, 0, w, h);
+        }
+      }
+
+      animate();
+    }
+
+    // Attach confetti to "Pointless button"
+    document.getElementById('pointlessBtn').addEventListener('click', launchConfetti);
+
+    // Keep canvas always on top and full screen
+    window.addEventListener('resize', () => {
+      const canvas = document.getElementById('confetti-canvas');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  </script>
+</body>
+</html>
