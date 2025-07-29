@@ -32,9 +32,12 @@
       cursor: pointer;
       transition: background 0.2s, color 0.2s;
       margin: 0.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
     button:hover {
       background: #005bb5;
+      transform: scale(1.05);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.10);
     }
 
     /* Dark mode styles */
@@ -43,7 +46,7 @@
       color: #f4f4f4;
     }
     .container.dark-mode {
-      background: #181818;
+      background: #232323; /* was #181818 */
       color: #f4f4f4;
     }
     body.dark-mode button:not(.dark-mode-toggle) {
@@ -52,6 +55,12 @@
     }
     body.dark-mode button:not(.dark-mode-toggle):hover {
       background: #b71c1c;
+    }
+    body.dark-mode .switch input:checked + .slider {
+      background-color: #3a3a3a; /* lighter than #232323 */
+    }
+    body.dark-mode .switch input:checked + .slider:before {
+      background-color: #fff;
     }
 
     /* Switch styles */
@@ -137,16 +146,27 @@
     .container.dark-mode .main-title {
       color: #f4f4f4;
     }
+
+    @media (min-width: 600px) {
+      .pointless-btn-wrapper {
+        display: block;
+        margin-top: 1.5rem;
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container" id="main-container">
-    <img src="<img src="./images/Cmslemon.png" alt="Lemon Banana" class="banana-img" />
+    <img src="Cmslemon.png" alt="Unable to use image" class="banana-img" />
     <div class="main-title">Lemon's Teleport Commands</div>
-    <button id="pointlessBtn">Pointless button</button>
-    <button onclick="window.location.href='https://www.youtube.com/@lemonthebanana_shorts'">Go to Lemon's Youtube</button>
-    <button onclick="window.location.href='https://www.tiktok.com/@lemon.the.banana'">Go to Lemon's Tiktok</button>
-    <button onclick="window.location.href='https://discord.gg/7rxjp5BAnD'">Go to Lemon's Discord</button>
+    <button class="teleport-btn" data-url="https://www.youtube.com/@lemonthebanana_shorts">Go to Lemon's Youtube</button>
+    <button class="teleport-btn" data-url="https://www.tiktok.com/@lemon.the.banana">Go to Lemon's Tiktok</button>
+    <button class="teleport-btn" data-url="https://discord.gg/7rxjp5BAnD">Go to Lemon's Discord</button>
+    <button class="teleport-btn" data-url="https://v.lemon8-app.com/al/OgNxQMhcmx">Go to Lemon's Lemon8</button>
+    <div class="pointless-btn-wrapper">
+      <button id="pointlessBtn">Pointless button</button>
+    </div>
     <div class="switch-container">
       <label class="switch">
         <input type="checkbox" id="darkModeSwitch" onchange="toggleDarkModeSwitch()">
@@ -156,22 +176,14 @@
     </div>
   </div>
   <canvas class="confetti" id="confetti-canvas"></canvas>
+  <audio id="popSound" src="pop.mp3" preload="auto"></audio>
   <script>
     function toggleDarkModeSwitch() {
       const isChecked = document.getElementById('darkModeSwitch').checked;
       document.body.classList.toggle('dark-mode', isChecked);
       document.getElementById('main-container').classList.toggle('dark-mode', isChecked);
-    }
-
-    // Confetti effect logic
-    const confettiColors = [
-      "#ff0a54", "#ff477e", "#ff7096", "#ff85a1", "#fbb1bd",
-      "#f9bec7", "#f7cad0", "#b5ead7", "#caffbf", "#9bf6ff",
-      "#a0c4ff", "#bdb2ff", "#ffc6ff", "#fdffb6"
-    ];
-
-    function randomBetween(a, b) {
-      return a + Math.random() * (b - a);
+      popSound.currentTime = 0;
+      popSound.play();
     }
 
     function launchConfetti() {
@@ -182,9 +194,18 @@
       canvas.width = w;
       canvas.height = h;
 
+      const confettiColors = [
+        "#ff0a54", "#ff477e", "#ff7096", "#ff85a1", "#fbb1bd",
+        "#f9bec7", "#f7cad0", "#b5ead7", "#caffbf", "#9bf6ff",
+        "#a0c4ff", "#bdb2ff", "#ffc6ff", "#fdffb6"
+      ];
       const confettiCount = 120;
       const gravity = 0.5;
       const confettiPieces = [];
+
+      function randomBetween(a, b) {
+        return a + Math.random() * (b - a);
+      }
 
       for (let i = 0; i < confettiCount; i++) {
         confettiPieces.push({
@@ -201,6 +222,8 @@
       }
 
       let frame = 0;
+      let animationFrames = 0;
+
       function drawConfetti() {
         ctx.clearRect(0, 0, w, h);
         confettiPieces.forEach(conf => {
@@ -212,7 +235,7 @@
           ctx.lineTo(conf.x + conf.tilt, conf.y + conf.d);
           ctx.stroke();
         });
-        ctx.globalAlpha = 1; // Reset for other canvas draws
+        ctx.globalAlpha = 1;
       }
 
       function updateConfetti() {
@@ -222,8 +245,6 @@
           conf.x += Math.sin(frame) * 2;
           conf.tiltAngle += conf.tiltAngleIncremental;
           conf.tilt = Math.sin(conf.tiltAngle) * 15;
-
-          // Recycle confetti to the top if it falls below screen
           if (conf.y > h) {
             conf.y = randomBetween(-20, 0);
             conf.x = randomBetween(0, w);
@@ -231,13 +252,12 @@
         }
       }
 
-      let animationFrames = 0;
       function animate() {
         frame++;
+        animationFrames++;
         drawConfetti();
         updateConfetti();
-        animationFrames++;
-        if (animationFrames < 120) { // Show confetti for ~2 seconds at 60fps
+        if (animationFrames < 120) {
           requestAnimationFrame(animate);
         } else {
           ctx.clearRect(0, 0, w, h);
@@ -247,8 +267,28 @@
       animate();
     }
 
-    // Attach confetti to "Pointless button"
-    document.getElementById('pointlessBtn').addEventListener('click', launchConfetti);
+    // Attach confetti and pop sound to "Pointless button"
+    const popSound = document.getElementById('popSound');
+    popSound.load();
+
+    document.getElementById('pointlessBtn').addEventListener('click', () => {
+      launchConfetti();
+      popSound.currentTime = 0;
+      popSound.play();
+    });
+
+    // Delay navigation for all teleport buttons
+    document.querySelectorAll('.teleport-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const url = this.getAttribute('data-url');
+        popSound.currentTime = 0;
+        popSound.play();
+        setTimeout(() => {
+          window.location.href = url;
+        }, 500); // 500ms delay
+      });
+    });
 
     // Keep canvas always on top and full screen
     window.addEventListener('resize', () => {
